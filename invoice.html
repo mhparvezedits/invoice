@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Mh Parvez Invoice Maker</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 40px 20px;
+    background: #f3f4f6;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #111827;
+}
+
+.app {
+    max-width: 1100px;
+    margin: auto;
+}
+
+/* =========================
+   CONTROL PANEL
+========================= */
+
+.controls {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+
+.controls h2 {
+    margin: 0 0 20px;
+    font-size: 22px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.field.full {
+    grid-column: 1 / -1;
+}
+
+label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 12px 13px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    font-size: 14px;
+    outline: none;
+    background: white;
+}
+
+input:focus,
+select:focus {
+    border-color: #1f2937;
+}
+
+/* =========================
+   SERVICES
+========================= */
+
+.services-box {
+    margin-top: 8px;
+}
+
+.service-row {
+    display: grid;
+    grid-template-columns: 1fr 160px 45px;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.service-row input {
+    margin: 0;
+}
+
+.remove-service {
+    background: #fee2e2;
+    color: #991b1b;
+    border: none;
+    border-radius: 7px;
+    font-size: 18px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.remove-service:hover {
+    background: #fecaca;
+}
+
+.add-service {
+    background: #e5e7eb;
+    color: #111827;
+    border: none;
+    border-radius: 7px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.add-service:hover {
+    background: #d1d5db;
+}
+
+.total-preview {
+    text-align: right;
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.button-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+button {
+    border: none;
+    padding: 12px 20px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.generate-btn {
+    background: #1f2937;
+    color: white;
+}
+
+.generate-btn:hover {
+    background: #111827;
+}
+
+.reset-btn {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+/* =========================
+   INVOICE
+========================= */
+
+.invoice {
+    width: 100%;
+    max-width: 816px;
+    min-height: 1056px;
+    margin: auto;
+    background: white;
+    padding: 55px 55px 50px;
+    box-shadow: 0 5px 30px rgba(0,0,0,0.08);
+}
+
+.invoice-title {
+    text-align: center;
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 25px;
+}
+
+.invoice-meta {
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.invoice-meta strong {
+    font-weight: 700;
+}
+
+.section-title {
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 28px;
+    margin-bottom: 8px;
+    letter-spacing: .3px;
+}
+
+.contact {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.contact strong {
+    font-size: 15px;
+}
+
+/* =========================
+   INVOICE TABLE
+========================= */
+
+.invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.invoice-table th {
+    background: #1f2937 !important;
+    color: white !important;
+    padding: 11px 12px;
+    text-align: left;
+    font-weight: 700;
+}
+
+.invoice-table th:last-child,
+.invoice-table td:last-child {
+    text-align: right;
+}
+
+.invoice-table td {
+    padding: 12px;
+    border: 1px solid #d1d5db;
+}
+
+.invoice-table tr:nth-child(even) td {
+    background: #f9fafb;
+}
+
+.invoice-table .highlight td {
+    font-weight: 700;
+}
+
+/* =========================
+   AMOUNT DUE
+========================= */
+
+.amount-due {
+    text-align: right;
+    margin-top: 20px;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+/* =========================
+   PAYMENT TERMS
+========================= */
+
+.terms {
+    margin-top: 30px;
+}
+
+.terms-title {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.terms-text {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.thank-you {
+    text-align: center;
+    margin-top: 35px;
+    font-size: 14px;
+}
+
+/* =========================
+   PRINT
+========================= */
+
+@media print {
+
+    @page {
+        size: Letter;
+        margin: 0;
+    }
+
+    html,
+    body {
+        background: white !important;
+        margin: 0;
+        padding: 0;
+    }
+
+    .controls {
+        display: none !important;
+    }
+
+    .app {
+        max-width: none;
+        margin: 0;
+    }
+
+    .invoice {
+        width: 8.5in;
+        min-height: 11in;
+        max-width: none;
+        margin: 0;
+        padding: 0.55in;
+        box-shadow: none;
+        background: white !important;
+    }
+
+    .invoice-table th {
+        background: #1f2937 !important;
+        color: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 700px) {
+
+    body {
+        padding: 15px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .field.full {
+        grid-column: auto;
+    }
+
+    .service-row {
+        grid-template-columns: 1fr;
+    }
+
+    .remove-service {
+        height: 40px;
+    }
+
+    .invoice {
+        padding: 30px 25px;
+    }
+
+    .invoice-title {
+        font-size: 28px;
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="app">
+
+    <!-- =========================
+         CONTROL PANEL
+    ========================= -->
+
+    <div class="controls">
+
+        <h2>Invoice Maker</h2>
+
+        <div class="form-grid">
+
+            <!-- CLIENT NAME -->
+
+            <div class="field">
+
+                <label>
+                    Client Name
+                </label>
+
+                <input
+                    type="text"
+                    id="clientName"
+                    placeholder="Calvin M. Capp"
+                    value="Calvin M. Capp"
+                >
+
+            </div>
+
+
+            <!-- CLIENT EMAIL -->
+
+            <div class="field">
+
+                <label>
+                    Client Email
+                </label>
+
+                <input
+                    type="email"
+                    id="clientEmail"
+                    placeholder="client@email.com"
+                    value="calvin.m.capp@gmail.com"
+                >
+
+            </div>
+
+
+            <!-- SERVICES -->
+
+            <div class="field full">
+
+                <label>
+                    Project / Services
+                </label>
+
+                <div
+                    class="services-box"
+                    id="servicesBox"
+                >
+
+                    <!-- First service -->
+
+                    <div class="service-row">
+
+                        <input
+                            type="text"
+                            class="service-description"
+                            placeholder="Video Editing"
+                            value="14-Minute Video Editing Project"
+                        >
+
+                        <input
+                            type="number"
+                            class="service-amount"
+                            placeholder="Amount"
+                            value="450"
+                            min="0"
+                            step="0.01"
+                        >
+
+                        <button
+                            type="button"
+                            class="remove-service"
+                            onclick="removeService(this)"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="add-service"
+                    onclick="addService()"
+                >
+                    + Add Service
+                </button>
+
+
+                <div class="total-preview">
+
+                    Total:
+                    $<span id="totalPreview">450.00</span>
+
+                </div>
+
+            </div>
+
+
+            <!-- PAYMENT STATUS -->
+
+            <div class="field">
+
+                <label>
+                    Payment Status
+                </label>
+
+                <select id="paymentStatus">
+
+                    <option value="upfront">
+                        50% Upfront Payment
+                    </option>
+
+                    <option value="full">
+                        Full Payment
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- AMOUNT PAID -->
+
+            <div class="field">
+
+                <label>
+                    Amount Paid / Due Now (USD)
+                </label>
+
+                <input
+                    type="number"
+                    id="amountPaid"
+                    min="0"
+                    step="0.01"
+                    value="225"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="button-row">
+
+            <button
+                class="generate-btn"
+                onclick="generateInvoice(true)"
+            >
+                Generate / Print PDF
+            </button>
+
+
+            <button
+                class="reset-btn"
+                onclick="resetInvoice()"
+            >
+                Reset
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         INVOICE
+    ========================= -->
+
+    <div
+        class="invoice"
+        id="invoice"
+    >
+
+        <div class="invoice-title">
+            INVOICE
+        </div>
+
+
+        <div class="invoice-meta">
+
+            <strong>Invoice #:</strong>
+            <span id="invoiceNumber"></span>
+
+            <br>
+
+            <strong>Date:</strong>
+            <span id="invoiceDate"></span>
+
+            <br>
+
+            <strong>Payment Status:</strong>
+            <span id="invoiceStatus"></span>
+
+        </div>
+
+
+        <!-- FROM -->
+
+        <div class="section-title">
+            FROM
+        </div>
+
+        <div class="contact">
+
+            <strong>Mh Parvez</strong>
+
+            <br>
+
+            Strategic Video Editor
+
+            <br>
+
+            Email: immhparvez@gmail.com
+
+        </div>
+
+
+        <!-- BILL TO -->
+
+        <div class="section-title">
+            BILL TO
+        </div>
+
+        <div class="contact">
+
+            <strong id="billClientName">
+                Calvin M. Capp
+            </strong>
+
+            <br>
+
+            Email:
+            <span id="billClientEmail">
+                calvin.m.capp@gmail.com
+            </span>
+
+        </div>
+
+
+        <!-- PROJECT DETAILS -->
+
+        <div class="section-title">
+            PROJECT DETAILS
+        </div>
+
+
+        <table class="invoice-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Description
+                    </th>
+
+                    <th>
+                        Amount
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="invoiceTableBody">
+
+            </tbody>
+
+        </table>
+
+
+        <!-- AMOUNT DUE -->
+
+        <div class="amount-due">
+
+            Amount Due Now:
+            <span id="amountDue">
+                $225.00
+            </span>
+            USD
+
+        </div>
+
+
+        <!-- PAYMENT TERMS -->
+
+        <div class="terms">
+
+            <div class="terms-title">
+                PAYMENT TERMS
+            </div>
+
+            <div
+                class="terms-text"
+                id="paymentTerms"
+            ></div>
+
+        </div>
+
+
+        <div class="thank-you">
+
+            Thank you for your business!
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* ==========================================
+   CURRENT INVOICE NUMBER
+========================================== */
+
+let currentInvoiceNumber = "";
+
+
+/* ==========================================
+   GENERATE RANDOM INVOICE NUMBER
+========================================== */
+
+function generateInvoiceNumber() {
+
+    const now = new Date();
+
+    const year =
+        now.getFullYear();
+
+    const month =
+        String(
+            now.getMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            now.getDate()
+        ).padStart(2, "0");
+
+
+    const random =
+        Math.floor(
+            1000 +
+            Math.random() * 9000
+        );
+
+
+    return `INV-${year}-${month}${day}-${random}`;
+
+}
+
+
+/* ==========================================
+   FORMAT MONEY
+========================================== */
+
+function money(number) {
+
+    return Number(number || 0)
+        .toLocaleString(
+            "en-US",
+            {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }
+        );
+
+}
+
+
+/* ==========================================
+   FORMAT DATE
+========================================== */
+
+function formatDate() {
+
+    const date = new Date();
+
+    return date.toLocaleDateString(
+        "en-US",
+        {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        }
+    );
+
+}
+
+
+/* ==========================================
+   ADD SERVICE
+========================================== */
+
+function addService() {
+
+    const box =
+        document.getElementById(
+            "servicesBox"
+        );
+
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+
+    row.className =
+        "service-row";
+
+
+    row.innerHTML = `
+
+        <input
+            type="text"
+            class="service-description"
+            placeholder="Service description"
+        >
+
+        <input
+            type="number"
+            class="service-amount"
+            placeholder="Amount"
+            min="0"
+            step="0.01"
+        >
+
+        <button
+            type="button"
+            class="remove-service"
+            onclick="removeService(this)"
+        >
+            ×
+        </button>
+
+    `;
+
+
+    box.appendChild(row);
+
+
+    updateTotal();
+
+
+    /*
+       Listen for changes
+    */
+
+    row
+        .querySelector(".service-amount")
+        .addEventListener(
+            "input",
+            updateTotal
+        );
+
+}
+
+
+/* ==========================================
+   REMOVE SERVICE
+========================================== */
+
+function removeService(button) {
+
+    const rows =
+        document.querySelectorAll(
+            ".service-row"
+        );
+
+
+    /*
+       Keep at least one row
+    */
+
+    if (rows.length <= 1) {
+
+        return;
+
+    }
+
+
+    button
+        .parentElement
+        .remove();
+
+
+    updateTotal();
+
+}
+
+
+/* ==========================================
+   CALCULATE TOTAL
+========================================== */
+
+function getTotal() {
+
+    const amounts =
+        document.querySelectorAll(
+            ".service-amount"
+        );
+
+
+    let total = 0;
+
+
+    amounts.forEach(
+        input => {
+
+            total +=
+                Number(
+                    input.value
+                ) || 0;
+
+        }
+    );
+
+
+    return total;
+
+}
+
+
+/* ==========================================
+   UPDATE TOTAL PREVIEW
+========================================== */
+
+function updateTotal() {
+
+    const total =
+        getTotal();
+
+
+    document.getElementById(
+        "totalPreview"
+    ).textContent =
+        money(total);
+
+
+    /*
+       Automatically update payment
+       amount based on status
+    */
+
+    const status =
+        document.getElementById(
+            "paymentStatus"
+        ).value;
+
+
+    if (status === "full") {
+
+        document.getElementById(
+            "amountPaid"
+        ).value =
+            total.toFixed(2);
+
+    }
+
+    else {
+
+        document.getElementById(
+            "amountPaid"
+        ).value =
+            (total / 2).toFixed(2);
+
+    }
+
+}
+
+
+/* ==========================================
+   GET SERVICE DATA
+========================================== */
+
+function getServices() {
+
+    const rows =
+        document.querySelectorAll(
+            ".service-row"
+        );
+
+
+    const services = [];
+
+
+    rows.forEach(
+        row => {
+
+            const description =
+                row
+                .querySelector(
+                    ".service-description"
+                )
+                .value
+                .trim();
+
+
+            const amount =
+                Number(
+                    row
+                    .querySelector(
+                        ".service-amount"
+                    )
+                    .value
+                ) || 0;
+
+
+            if (
+                description ||
+                amount > 0
+            ) {
+
+                services.push({
+                    description,
+                    amount
+                });
+
+            }
+
+        }
+    );
+
+
+    return services;
+
+}
+
+
+/* ==========================================
+   ESCAPE HTML
+========================================== */
+
+function escapeHTML(text) {
+
+    return String(text)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+/* ==========================================
+   GENERATE INVOICE
+========================================== */
+
+function generateInvoice(
+    shouldPrint = false
+) {
+
+    /*
+       Generate invoice number ONLY
+       when creating a new invoice
+    */
+
+    currentInvoiceNumber =
+        generateInvoiceNumber();
+
+
+    /* CLIENT */
+
+    const clientName =
+        document.getElementById(
+            "clientName"
+        )
+        .value
+        .trim();
+
+
+    const clientEmail =
+        document.getElementById(
+            "clientEmail"
+        )
+        .value
+        .trim();
+
+
+    /* SERVICES */
+
+    const services =
+        getServices();
+
+
+    const totalAmount =
+        getTotal();
+
+
+    /* PAYMENT */
+
+    const amountPaid =
+        Number(
+            document.getElementById(
+                "amountPaid"
+            ).value
+        ) || 0;
+
+
+    const status =
+        document.getElementById(
+            "paymentStatus"
+        ).value;
+
+
+    /* ======================================
+       META
+    ====================================== */
+
+    document.getElementById(
+        "invoiceNumber"
+    ).textContent =
+        currentInvoiceNumber;
+
+
+    document.getElementById(
+        "invoiceDate"
+    ).textContent =
+        formatDate();
+
+
+    document.getElementById(
+        "invoiceStatus"
+    ).textContent =
+        status === "full"
+            ? "Full Payment"
+            : "50% Upfront Payment";
+
+
+    /* ======================================
+       CLIENT
+    ====================================== */
+
+    document.getElementById(
+        "billClientName"
+    ).textContent =
+        clientName ||
+        "Client Name";
+
+
+    document.getElementById(
+        "billClientEmail"
+    ).textContent =
+        clientEmail ||
+        "client@email.com";
+
+
+    /* ======================================
+       TABLE
+    ====================================== */
+
+    const table =
+        document.getElementById(
+            "invoiceTableBody"
+        );
+
+
+    table.innerHTML = "";
+
+
+    /*
+       Add every service
+    */
+
+    services.forEach(
+        service => {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.innerHTML = `
+
+                <td>
+                    ${escapeHTML(
+                        service.description
+                    )}
+                </td>
+
+                <td>
+                    $${money(
+                        service.amount
+                    )}
+                </td>
+
+            `;
+
+
+            table.appendChild(row);
+
+        }
+    );
+
+
+    /* ======================================
+       PAYMENT ROWS
+    ====================================== */
+
+    if (
+        status === "upfront"
+    ) {
+
+        const remaining =
+            Math.max(
+                totalAmount -
+                amountPaid,
+                0
+            );
+
+
+        table.innerHTML += `
+
+            <tr class="highlight">
+
+                <td>
+                    50% Upfront Payment — Due Now
+                </td>
+
+                <td>
+                    $${money(amountPaid)}
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Remaining Balance
+                </td>
+
+                <td>
+                    $${money(remaining)}
+                </td>
+
+            </tr>
+
+        `;
+
+
+        document.getElementById(
+            "amountDue"
+        ).textContent =
+            "$" + money(amountPaid);
+
+
+        document.getElementById(
+            "paymentTerms"
+        ).textContent =
+
+            `A 50% upfront payment of $${money(amountPaid)} USD is due now. The remaining $${money(remaining)} USD will be due upon completion of the project.`;
+
+    }
+
+
+    else {
+
+        table.innerHTML += `
+
+            <tr class="highlight">
+
+                <td>
+                    Full Payment
+                </td>
+
+                <td>
+                    $${money(amountPaid)}
+                </td>
+
+            </tr>
+
+        `;
+
+
+        document.getElementById(
+            "amountDue"
+        ).textContent =
+            "$" + money(amountPaid);
+
+
+        document.getElementById(
+            "paymentTerms"
+        ).textContent =
+
+            `Full payment of $${money(amountPaid)} USD is due for the project. No remaining balance is due after payment.`;
+
+    }
+
+
+    /* ======================================
+       PRINT
+    ====================================== */
+
+    if (shouldPrint) {
+
+        setTimeout(
+            () => {
+
+                window.print();
+
+            },
+            200
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   PAYMENT STATUS CHANGE
+========================================== */
+
+document
+    .getElementById(
+        "paymentStatus"
+    )
+    .addEventListener(
+        "change",
+        function() {
+
+            updateTotal();
+
+        }
+    );
+
+
+/* ==========================================
+   SERVICE INPUT LISTENERS
+========================================== */
+
+document
+    .querySelectorAll(
+        ".service-amount"
+    )
+    .forEach(
+        input => {
+
+            input.addEventListener(
+                "input",
+                updateTotal
+            );
+
+        }
+    );
+
+
+/* ==========================================
+   RESET
+========================================== */
+
+function resetInvoice() {
+
+    document.getElementById(
+        "clientName"
+    ).value = "";
+
+
+    document.getElementById(
+        "clientEmail"
+    ).value = "";
+
+
+    const box =
+        document.getElementById(
+            "servicesBox"
+        );
+
+
+    box.innerHTML = `
+
+        <div class="service-row">
+
+            <input
+                type="text"
+                class="service-description"
+                placeholder="Service description"
+            >
+
+            <input
+                type="number"
+                class="service-amount"
+                placeholder="Amount"
+                min="0"
+                step="0.01"
+            >
+
+            <button
+                type="button"
+                class="remove-service"
+                onclick="removeService(this)"
+            >
+                ×
+            </button>
+
+        </div>
+
+    `;
+
+
+    document.getElementById(
+        "paymentStatus"
+    ).value =
+        "upfront";
+
+
+    document.getElementById(
+        "amountPaid"
+    ).value =
+        "0";
+
+
+    /*
+       Reconnect amount listener
+    */
+
+    box
+        .querySelector(
+            ".service-amount"
+        )
+        .addEventListener(
+            "input",
+            updateTotal
+        );
+
+
+    updateTotal();
+
+}
+
+
+/* ==========================================
+   INITIAL DISPLAY
+========================================== */
+
+generateInvoice(false);
+
+</script>
+
+</body>
+</html>
+```
