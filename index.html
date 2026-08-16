@@ -1,14 +1,3 @@
-I see exactly what the issue is!
-
-The math is calculating perfectly behind the scenes ($450/2 + $25 + $50 = **$300 Due Now**). However, on the actual generated PDF, the client just sees a list of services and then a sudden $300 charge. Because the invoice table doesn't explicitly state which items are "50% Upfront" and which are "100% Full Payment," the math looks like a random number to the person reading it.
-
-To fix this, I have updated the code so that **the printed invoice will now display the individual payment status directly beneath each service description**. This way, your client understands exactly how the $300 "Amount Due Now" was calculated.
-
-I also made sure the "Amount Due Now" input box calculates correctly the second you open the page.
-
-Here is the fully updated code:
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -101,13 +90,12 @@ select:focus {
 
 .service-row {
     display: grid;
-    grid-template-columns: 1fr 110px 140px 45px;
+    grid-template-columns: 1fr 160px 45px;
     gap: 10px;
     margin-bottom: 10px;
 }
 
-.service-row input, 
-.service-row select {
+.service-row input {
     margin: 0;
 }
 
@@ -119,10 +107,6 @@ select:focus {
     font-size: 18px;
     cursor: pointer;
     font-weight: 700;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0;
 }
 
 .remove-service:hover {
@@ -191,6 +175,7 @@ button {
 .invoice {
     width: 100%;
     max-width: 816px;
+    min-height: 1056px;
     margin: auto;
     background: white;
     padding: 55px 55px 50px;
@@ -258,7 +243,6 @@ button {
 .invoice-table td {
     padding: 12px;
     border: 1px solid #d1d5db;
-    vertical-align: top;
 }
 
 .invoice-table tr:nth-child(even) td {
@@ -267,13 +251,6 @@ button {
 
 .invoice-table .highlight td {
     font-weight: 700;
-}
-
-.item-status-label {
-    font-size: 11px;
-    color: #6b7280;
-    margin-top: 4px;
-    font-weight: 400;
 }
 
 /* =========================
@@ -341,6 +318,7 @@ button {
 
     .invoice {
         width: 8.5in;
+        min-height: 11in;
         max-width: none;
         margin: 0;
         padding: 0.55in;
@@ -479,11 +457,6 @@ button {
                             min="0"
                             step="0.01"
                         >
-                        
-                        <select class="service-status">
-                            <option value="upfront">50% Upfront</option>
-                            <option value="full">100% Full</option>
-                        </select>
 
                         <button
                             type="button"
@@ -517,12 +490,35 @@ button {
             </div>
 
 
-            <!-- AMOUNT PAID / DUE NOW -->
+            <!-- PAYMENT STATUS -->
 
             <div class="field">
 
                 <label>
-                    Amount Due Now (USD)
+                    Payment Status
+                </label>
+
+                <select id="paymentStatus">
+
+                    <option value="upfront">
+                        50% Upfront Payment
+                    </option>
+
+                    <option value="full">
+                        Full Payment
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- AMOUNT PAID -->
+
+            <div class="field">
+
+                <label>
+                    Amount Paid / Due Now (USD)
                 </label>
 
                 <input
@@ -530,6 +526,7 @@ button {
                     id="amountPaid"
                     min="0"
                     step="0.01"
+                    value="225"
                 >
 
             </div>
@@ -825,11 +822,6 @@ function addService() {
             min="0"
             step="0.01"
         >
-        
-        <select class="service-status">
-            <option value="upfront">50% Upfront</option>
-            <option value="full">100% Full</option>
-        </select>
 
         <button
             type="button"
@@ -856,13 +848,6 @@ function addService() {
         .querySelector(".service-amount")
         .addEventListener(
             "input",
-            updateTotal
-        );
-        
-    row
-        .querySelector(".service-status")
-        .addEventListener(
-            "change",
             updateTotal
         );
 
@@ -903,43 +888,45 @@ function removeService(button) {
 
 
 /* ==========================================
-   CALCULATE TOTAL AND DUE NOW
+   CALCULATE TOTAL
 ========================================== */
 
-function updateTotal() {
+function getTotal() {
 
-    const rows =
+    const amounts =
         document.querySelectorAll(
-            ".service-row"
+            ".service-amount"
         );
 
 
     let total = 0;
-    let dueNow = 0;
 
 
-    rows.forEach(
-        row => {
+    amounts.forEach(
+        input => {
 
-            const amount =
+            total +=
                 Number(
-                    row.querySelector(".service-amount").value
+                    input.value
                 ) || 0;
-                
-            const status = 
-                row.querySelector(".service-status").value;
-
-
-            total += amount;
-            
-            if (status === "full") {
-                dueNow += amount;
-            } else {
-                dueNow += (amount / 2);
-            }
 
         }
     );
+
+
+    return total;
+
+}
+
+
+/* ==========================================
+   UPDATE TOTAL PREVIEW
+========================================== */
+
+function updateTotal() {
+
+    const total =
+        getTotal();
 
 
     document.getElementById(
@@ -948,11 +935,34 @@ function updateTotal() {
         money(total);
 
 
-    document.getElementById(
-        "amountPaid"
-    ).value =
-        dueNow.toFixed(2);
+    /*
+       Automatically update payment
+       amount based on status
+    */
 
+    const status =
+        document.getElementById(
+            "paymentStatus"
+        ).value;
+
+
+    if (status === "full") {
+
+        document.getElementById(
+            "amountPaid"
+        ).value =
+            total.toFixed(2);
+
+    }
+
+    else {
+
+        document.getElementById(
+            "amountPaid"
+        ).value =
+            (total / 2).toFixed(2);
+
+    }
 
 }
 
@@ -992,9 +1002,6 @@ function getServices() {
                     )
                     .value
                 ) || 0;
-                
-            const status = 
-                row.querySelector(".service-status").value;
 
 
             if (
@@ -1004,8 +1011,7 @@ function getServices() {
 
                 services.push({
                     description,
-                    amount,
-                    status
+                    amount
                 });
 
             }
@@ -1091,8 +1097,8 @@ function generateInvoice(
         getServices();
 
 
-    let totalAmount = 0;
-    services.forEach(s => totalAmount += s.amount);
+    const totalAmount =
+        getTotal();
 
 
     /* PAYMENT */
@@ -1105,12 +1111,10 @@ function generateInvoice(
         ) || 0;
 
 
-    let statusText = "Split / Upfront Payment";
-    if (amountPaid === totalAmount) {
-        statusText = "Full Payment";
-    } else if (amountPaid === totalAmount / 2) {
-        statusText = "50% Upfront Payment";
-    }
+    const status =
+        document.getElementById(
+            "paymentStatus"
+        ).value;
 
 
     /* ======================================
@@ -1132,7 +1136,9 @@ function generateInvoice(
     document.getElementById(
         "invoiceStatus"
     ).textContent =
-        statusText;
+        status === "full"
+            ? "Full Payment"
+            : "50% Upfront Payment";
 
 
     /* ======================================
@@ -1177,19 +1183,20 @@ function generateInvoice(
                 document.createElement(
                     "tr"
                 );
-                
-            // Text to show the client the payment structure for this specific item
-            const statusLabel = service.status === "full" ? "100% Full Payment" : "50% Upfront";
+
 
             row.innerHTML = `
 
                 <td>
-                    ${escapeHTML(service.description)}
-                    <div class="item-status-label">${statusLabel}</div>
+                    ${escapeHTML(
+                        service.description
+                    )}
                 </td>
 
                 <td>
-                    $${money(service.amount)}
+                    $${money(
+                        service.amount
+                    )}
                 </td>
 
             `;
@@ -1201,33 +1208,12 @@ function generateInvoice(
     );
 
 
-    /*
-       Add a row for the Project Total
-    */
-
-    table.innerHTML += `
-
-        <tr class="highlight" style="border-top: 2px solid #1f2937;">
-
-            <td>
-                Project Total
-            </td>
-
-            <td>
-                $${money(totalAmount)}
-            </td>
-
-        </tr>
-
-    `;
-
-
     /* ======================================
        PAYMENT ROWS
     ====================================== */
 
     if (
-        amountPaid < totalAmount
+        status === "upfront"
     ) {
 
         const remaining =
@@ -1240,10 +1226,10 @@ function generateInvoice(
 
         table.innerHTML += `
 
-            <tr>
+            <tr class="highlight">
 
                 <td>
-                    Amount Due Now
+                    50% Upfront Payment — Due Now
                 </td>
 
                 <td>
@@ -1278,7 +1264,7 @@ function generateInvoice(
             "paymentTerms"
         ).textContent =
 
-            `An upfront payment of $${money(amountPaid)} USD is due now. The remaining $${money(remaining)} USD will be due upon completion of the project.`;
+            `A 50% upfront payment of $${money(amountPaid)} USD is due now. The remaining $${money(remaining)} USD will be due upon completion of the project.`;
 
     }
 
@@ -1287,10 +1273,10 @@ function generateInvoice(
 
         table.innerHTML += `
 
-            <tr>
+            <tr class="highlight">
 
                 <td>
-                    Full Payment — Due Now
+                    Full Payment
                 </td>
 
                 <td>
@@ -1338,6 +1324,24 @@ function generateInvoice(
 
 
 /* ==========================================
+   PAYMENT STATUS CHANGE
+========================================== */
+
+document
+    .getElementById(
+        "paymentStatus"
+    )
+    .addEventListener(
+        "change",
+        function() {
+
+            updateTotal();
+
+        }
+    );
+
+
+/* ==========================================
    SERVICE INPUT LISTENERS
 ========================================== */
 
@@ -1350,21 +1354,6 @@ document
 
             input.addEventListener(
                 "input",
-                updateTotal
-            );
-
-        }
-    );
-
-document
-    .querySelectorAll(
-        ".service-status"
-    )
-    .forEach(
-        select => {
-
-            select.addEventListener(
-                "change",
                 updateTotal
             );
 
@@ -1411,11 +1400,6 @@ function resetInvoice() {
                 min="0"
                 step="0.01"
             >
-            
-            <select class="service-status">
-                <option value="upfront">50% Upfront</option>
-                <option value="full">100% Full</option>
-            </select>
 
             <button
                 type="button"
@@ -1431,13 +1415,19 @@ function resetInvoice() {
 
 
     document.getElementById(
+        "paymentStatus"
+    ).value =
+        "upfront";
+
+
+    document.getElementById(
         "amountPaid"
     ).value =
         "0";
 
 
     /*
-       Reconnect amount listeners
+       Reconnect amount listener
     */
 
     box
@@ -1446,15 +1436,6 @@ function resetInvoice() {
         )
         .addEventListener(
             "input",
-            updateTotal
-        );
-        
-    box
-        .querySelector(
-            ".service-status"
-        )
-        .addEventListener(
-            "change",
             updateTotal
         );
 
@@ -1468,12 +1449,10 @@ function resetInvoice() {
    INITIAL DISPLAY
 ========================================== */
 
-updateTotal();
 generateInvoice(false);
 
 </script>
 
 </body>
 </html>
-
 ```
