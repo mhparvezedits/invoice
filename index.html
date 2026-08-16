@@ -1140,7 +1140,7 @@ function generateInvoice(
     ).textContent =
         status === "full"
             ? "Full Payment"
-            : "50% Upfront Payment";
+            : "Upfront Payment";
 
 
     /* ======================================
@@ -1210,6 +1210,27 @@ function generateInvoice(
     );
 
 
+    /*
+       Add a row for the Project Total
+    */
+
+    table.innerHTML += `
+
+        <tr class="highlight" style="border-top: 2px solid #1f2937;">
+
+            <td>
+                Project Total
+            </td>
+
+            <td>
+                $${money(totalAmount)}
+            </td>
+
+        </tr>
+
+    `;
+
+
     /* ======================================
        PAYMENT ROWS
     ====================================== */
@@ -1228,10 +1249,10 @@ function generateInvoice(
 
         table.innerHTML += `
 
-            <tr class="highlight">
+            <tr>
 
                 <td>
-                    50% Upfront Payment — Due Now
+                    Upfront Payment — Due Now
                 </td>
 
                 <td>
@@ -1266,7 +1287,7 @@ function generateInvoice(
             "paymentTerms"
         ).textContent =
 
-            `A 50% upfront payment of $${money(amountPaid)} USD is due now. The remaining $${money(remaining)} USD will be due upon completion of the project.`;
+            `An upfront payment of $${money(amountPaid)} USD is due now. The remaining $${money(remaining)} USD will be due upon completion of the project.`;
 
     }
 
@@ -1275,10 +1296,10 @@ function generateInvoice(
 
         table.innerHTML += `
 
-            <tr class="highlight">
+            <tr>
 
                 <td>
-                    Full Payment
+                    Full Payment — Due Now
                 </td>
 
                 <td>
