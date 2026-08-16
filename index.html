@@ -1,3 +1,14 @@
+I see exactly what the issue is!
+
+The math is calculating perfectly behind the scenes ($450/2 + $25 + $50 = **$300 Due Now**). However, on the actual generated PDF, the client just sees a list of services and then a sudden $300 charge. Because the invoice table doesn't explicitly state which items are "50% Upfront" and which are "100% Full Payment," the math looks like a random number to the person reading it.
+
+To fix this, I have updated the code so that **the printed invoice will now display the individual payment status directly beneath each service description**. This way, your client understands exactly how the $300 "Amount Due Now" was calculated.
+
+I also made sure the "Amount Due Now" input box calculates correctly the second you open the page.
+
+Here is the fully updated code:
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -90,7 +101,6 @@ select:focus {
 
 .service-row {
     display: grid;
-    /* Updated grid to fit the new dropdown */
     grid-template-columns: 1fr 110px 140px 45px;
     gap: 10px;
     margin-bottom: 10px;
@@ -248,6 +258,7 @@ button {
 .invoice-table td {
     padding: 12px;
     border: 1px solid #d1d5db;
+    vertical-align: top;
 }
 
 .invoice-table tr:nth-child(even) td {
@@ -256,6 +267,13 @@ button {
 
 .invoice-table .highlight td {
     font-weight: 700;
+}
+
+.item-status-label {
+    font-size: 11px;
+    color: #6b7280;
+    margin-top: 4px;
+    font-weight: 400;
 }
 
 /* =========================
@@ -461,8 +479,7 @@ button {
                             min="0"
                             step="0.01"
                         >
-
-                        <!-- Added per-item status dropdown -->
+                        
                         <select class="service-status">
                             <option value="upfront">50% Upfront</option>
                             <option value="full">100% Full</option>
@@ -513,7 +530,6 @@ button {
                     id="amountPaid"
                     min="0"
                     step="0.01"
-                    value="225"
                 >
 
             </div>
@@ -1161,20 +1177,19 @@ function generateInvoice(
                 document.createElement(
                     "tr"
                 );
-
+                
+            // Text to show the client the payment structure for this specific item
+            const statusLabel = service.status === "full" ? "100% Full Payment" : "50% Upfront";
 
             row.innerHTML = `
 
                 <td>
-                    ${escapeHTML(
-                        service.description
-                    )}
+                    ${escapeHTML(service.description)}
+                    <div class="item-status-label">${statusLabel}</div>
                 </td>
 
                 <td>
-                    $${money(
-                        service.amount
-                    )}
+                    $${money(service.amount)}
                 </td>
 
             `;
@@ -1453,9 +1468,12 @@ function resetInvoice() {
    INITIAL DISPLAY
 ========================================== */
 
+updateTotal();
 generateInvoice(false);
 
 </script>
 
 </body>
 </html>
+
+```
